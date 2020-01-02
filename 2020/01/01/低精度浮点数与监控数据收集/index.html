@@ -55,7 +55,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://blog.nextzhou.site/uploads/IEEE_754.png">
 <meta property="article:published_time" content="2020-01-01T15:08:53.000Z">
-<meta property="article:modified_time" content="2020-01-01T15:10:07.271Z">
+<meta property="article:modified_time" content="2020-01-02T14:41:03.839Z">
 <meta property="article:author" content="nextzhou">
 <meta property="article:tag" content="Golang">
 <meta name="twitter:card" content="summary">
@@ -194,10 +194,16 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2020-01-01 23:08:53 / 修改时间：23:10:07" itemprop="dateCreated datePublished" datetime="2020-01-01T23:08:53+08:00">2020-01-01</time>
+              <time title="创建时间：2020-01-01 23:08:53" itemprop="dateCreated datePublished" datetime="2020-01-01T23:08:53+08:00">2020-01-01</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-01-02 22:41:03" itemprop="dateModified" datetime="2020-01-02T22:41:03+08:00">2020-01-02</time>
+              </span>
 
           
 
@@ -272,17 +278,17 @@
 <h2 id="监控数据的特点"><a href="#监控数据的特点" class="headerlink" title="监控数据的特点"></a>监控数据的特点</h2><p>光是口头上说两者的差异可能作用不大，我们来段简单的代码，比较一下两者输出数据的差别吧。</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 访问百度首页100次，分别用 Summary 与 Histogram 记录每次请求的耗时</span></span><br><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">100</span>; i++ &#123;</span><br><span class="line">    start := time.Now()</span><br><span class="line">    _, _ = http.Get(<span class="string">"https://www.baidu.com"</span>)</span><br><span class="line">    duration := time.Since(start)</span><br><span class="line">    h.Observe(duration.Seconds())</span><br><span class="line">    s.Observe(duration.Seconds())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p><del>通过 http 插件，可以看到上述代码的输出如下:</del> (有点问题，后续更新修复)</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>通过 http 插件，可以看到上述代码的输出如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"># HELP bar</span><br><span class="line"># TYPE bar summary</span><br><span class="line">bar_sum 34.33067820399999</span><br><span class="line">bar_count 100</span><br><span class="line"># HELP foo</span><br><span class="line"># TYPE foo histogram</span><br><span class="line">foo_bucket&#123;le&#x3D;&quot;0.005&quot;&#125; 0</span><br><span class="line">foo_bucket&#123;le&#x3D;&quot;0.01&quot;&#125; 0</span><br><span class="line">foo_bucket&#123;le&#x3D;&quot;0.025&quot;&#125; 0</span><br><span class="line">foo_bucket&#123;le&#x3D;&quot;0.05&quot;&#125; 0</span><br><span class="line">foo_bucket&#123;le&#x3D;&quot;0.1&quot;&#125; 0</span><br><span class="line">foo_bucket&#123;le&#x3D;&quot;0.25&quot;&#125; 36</span><br><span class="line">foo_bucket&#123;le&#x3D;&quot;0.5&quot;&#125; 88</span><br><span class="line">foo_bucket&#123;le&#x3D;&quot;1&quot;&#125; 100</span><br><span class="line">foo_bucket&#123;le&#x3D;&quot;2.5&quot;&#125; 100</span><br><span class="line">foo_bucket&#123;le&#x3D;&quot;5&quot;&#125; 100</span><br><span class="line">foo_bucket&#123;le&#x3D;&quot;10&quot;&#125; 100</span><br><span class="line">foo_bucket&#123;le&#x3D;&quot;+Inf&quot;&#125; 100</span><br><span class="line">foo_sum 34.33067820399999</span><br><span class="line">foo_count 100</span><br></pre></td></tr></table></figure>
 
 <p>显然，Histogram 的默认 Buckets 配置效果是差强人意的。那么，有没有一种更好的 Buckets 设计，能够低成本地满足监控数据聚合需求呢？</p>
 <p>查看 Golang 相关文档可知在 Go 中 <code>float64</code> 使用的是 <a href="https://zh.wikipedia.org/wiki/IEEE_754" target="_blank" rel="noopener">IEEE 754</a>标准，其数域范围大约是从 $-1.7977e+308$ 到 $1.7977e+308$。而且分布也是不均匀的，越靠近0越密集。这种情况下，想要设计出一个通用的 <code>float64</code> Buckets 几乎是不可能的，但好在我们是针对监控场景做优化，那让我们来看看在监控场景下的数据有什么特别吧：</p>
-<h3 id="精度要求不高"><a href="#精度要求不高" class="headerlink" title="精度要求不高"></a>精度要求不高</h3><p>我想应该不会有人关心某请求的耗时到底是 123.456ms 还是 123.457ms 吧？对于监控数据来说，1% 以内的误差无关痛痒。而在 IEEE 754 标准中，<code>float64</code> 使用了整整 52 bit 来保存精度信息！这对于监控数据来说简直是种不可容忍的浪费。</p>
+<h3 id="精度要求不高"><a href="#精度要求不高" class="headerlink" title="精度要求不高"></a>精度要求不高</h3><p>我想应该不会有人关心某请求的耗时到底是 123.456ms 还是 123.457ms 吧？对于监控数据来说，1% 以内的误差无关痛痒。而在 IEEE 754 标准中，<code>float64</code> 使用了整整 52 bits 来保存精度信息！这对于监控数据来说简直是种不可容忍的浪费。</p>
 <h3 id="数据分布相对集中"><a href="#数据分布相对集中" class="headerlink" title="数据分布相对集中"></a>数据分布相对集中</h3><p>虽说 <code>float64</code> 的数域很大，但我们监控的数据往往不会跨很多数量级。一个平均100ms的请求，不会出现 1ns 完成，也不会出现1年完成。一个1KB的包，也不可能某次变成1TB(PS: 就算出现了，这数量级相比 <code>float64</code> 仍然是小case)。</p>
 <h2 id="如何设计低精度浮点数"><a href="#如何设计低精度浮点数" class="headerlink" title="如何设计低精度浮点数"></a>如何设计低精度浮点数</h2><p>根据上节监控数据的特点以及 <a href="https://zh.wikipedia.org/wiki/IEEE_754" target="_blank" rel="noopener">IEEE 754</a>标准，我们可以推导出在内存中，一个 <code>float64</code> 的 64 bits 中哪些是重要的，以及其分布会有什么特点：</p>
 <p><img src="/uploads/IEEE_754.png" alt="IEEE 754"></p>
 <h3 id="sign"><a href="#sign" class="headerlink" title="sign"></a>sign</h3><p>sign 是浮点数的符号位，空间占用是 1 bit, 正数还是负数就是由它来决定的。很显然，这 1 bit 是必不可少的，虽说我上面举的例子都是正数，但也可能会有负数的出现。例如统计两个相互无依赖的事件发生的时间差。</p>
-<h3 id="exponent"><a href="#exponent" class="headerlink" title="exponent"></a>exponent</h3><p>exponent 是 base 2 的指数位，在 <code>float64</code> 中，它占用 11 bits。要注意的一个细节是，它比实际指数要小 1023，这样做的目的是为了表示负指数。或者换个思路，你把它看做 11 bit 的带符号整数就可以了。</p>
+<h3 id="exponent"><a href="#exponent" class="headerlink" title="exponent"></a>exponent</h3><p>exponent 是 base 2 的指数位，在 <code>float64</code> 中，它占用 11 bits。要注意的一个细节是，它比实际指数要小 1023，这样做的目的是为了表示负指数。或者换个思路，你把它看做 11 bits 的带符号整数就可以了。</p>
 <p>虽然我们能接受丢失精度，但缩小数域范围却是不能接受的，这会导致只有部分 <code>float64</code> 可以成功转换成我们的低精度浮点数，从而带来很多数据正确性上的隐患。因此，这 11 bits 也是必不可少。</p>
 <p>但是，我们上面有提到监控数据分布相对集中、跨数量级较少。这意味这什么呢？这意味着 exponent 的实际取值是极其有限的。 还是拿耗时举例子：最小耗时 1us，最大耗时24h。这应该已经覆盖了绝大多数请求耗时的范围了吧？两者换算比例 $1:8.64e10$，也就是在十进制下才跨不到 11 个数量级，换算成二进制就是跨了不到 37 个数量级(PS: 由于 $2^{10} = 1024 \cong 10^3$, 因此十进制换二进制数量级大概是 $\times 3$)。也就是说，在这种较为极端的 Case 下， exponent 也只有最多 37 个取值，相比所有取值 $2^{11} = 2048$ 种取值实在是小了太多。</p>
 <h3 id="fraction"><a href="#fraction" class="headerlink" title="fraction"></a>fraction</h3><p>fraction 用来保存数据的精度信息，在 <code>float64</code> 中<strong>占据了整整 52 bits</strong>！！！对于监控数据而言，我们只需要关心其中的一小部分就足够了。为了简化问题，我最终决定在 fraction 中取 8 bits 来保存精度信息，正好是 1 byte 的大小。 1/256 的精度，对于监控场景来说绰绰有余了。</p>
