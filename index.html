@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.0">
+<meta name="generator" content="Hexo 4.2.1">
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/uploads/favicon.ico">
   <link rel="icon" type="image/png" sizes="16x16" href="/uploads/favicon.ico">
@@ -165,6 +165,114 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.nextzhou.site/2020/06/02/%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E6%A3%80%E7%B4%A2%E5%B7%A5%E5%85%B7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="nextzhou">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="nextzhou's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/06/02/%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E6%A3%80%E7%B4%A2%E5%B7%A5%E5%85%B7/" class="post-title-link" itemprop="url">常用命令检索工具</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-06-02 13:16:53 / 修改时间：13:37:18" itemprop="dateCreated datePublished" datetime="2020-06-02T13:16:53+08:00">2020-06-02</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="常用命令检索"><a href="#常用命令检索" class="headerlink" title="常用命令检索"></a>常用命令检索</h1><p>当我重复第N次从聊天记录中查找某个又臭又长的 Shell 命令时，我在想：“为什么不把这些常用的命令存放在一个方便检索的地方呢？”</p>
+<p>其实这不是我第一次遇到这个需求了，不过在这之前，我都是依赖 Shell 历史记录搜索与文档搜索来解决的。<br>这也似乎是身边朋友使用得最多的一种方案，但它有以下几个问题：</p>
+<ol>
+<li>Shell 历史记录有条数限制，某个命令一段时间不执行就会搜不到</li>
+<li>Shell 历史记录中有太多“干扰”</li>
+<li>文档记录的触发路径过长，添加记录麻烦。后续的执行路径也过长(搜索&gt;选择&gt;复制&gt;切换到终端&gt;执行)</li>
+<li>Shell 与文档记录的搜索体验较差(可通过<a href="https://github.com/junegunn/fzf" target="_blank" rel="noopener">fzf</a>模糊搜索来改善)</li>
+</ol>
+<p>因此，针对以上几点可总结出我理想中的常用命令检索工具应该具有以下特征：</p>
+<ol>
+<li>易触发</li>
+<li>常用命令易管理、易添加</li>
+<li>执行流程短</li>
+<li>渐进式模糊匹配</li>
+</ol>
+<p>所以最终它的样子应该是这样的：</p>
+<ul>
+<li>全局可触发</li>
+<li>单个文本文件记录常用命令，一行一条记录</li>
+<li>通过  <a href="https://github.com/junegunn/fzf" target="_blank" rel="noopener">fzf</a> 来交互式地模糊匹配结果</li>
+<li>针对检索结果提供 <code>复制</code> <code>执行</code> <code>执行并复制输出结果</code>三个快捷动作</li>
+</ul>
+<p>使用 <a href="https://www.alfredapp.com/" target="_blank" rel="noopener">Alfred</a> 的朋友应该已经察觉到了，这不正是完美契合  <code>Alfred Workflows</code> 那套 “ Trigger -&gt; List -&gt; Filter -&gt; Action” 模型吗？</p>
+<h2 id="Workflow"><a href="#Workflow" class="headerlink" title="Workflow"></a>Workflow</h2><p>由于流程很简单，所以 Workflow 很容易就画出来了：</p>
+<p><img src="/uploads/c_workflows.png" alt=""></p>
+<p>其中 <code>Script Filter</code> 的核心代码就一行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fzf --exact --filter <span class="comment">#&#123;args&#125; &lt; ~/.commands</span></span><br></pre></td></tr></table></figure>
+
+<p><code>--exact</code>  是告诉 fzf 使用精准匹配，否则默认是拆成单个字符匹配的。</p>
+<p><code>--filter</code> 表示不使用交互式操作，因为交互的部分已经交给 <code>Alfred</code> 了。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>由于模糊匹配部分依赖 fzf， 所以首先得安装 fzf</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">brew install fzf</span><br></pre></td></tr></table></figure>
+
+<p>另外，你需要安装了 <code>Alfred</code>，并且需要开启了 <code>Workflows</code> (购买Powerpack <del>或者使用破解版</del>)</p>
+<p>下载<a href="/uploads/c.alfredworkflow">c.alfredworkflow</a> 并使用 <code>Alfred</code> 打开导入，便可以使用啦。</p>
+<h2 id="演示"><a href="#演示" class="headerlink" title="演示"></a>演示</h2><p>将常用命令写入到  <code>~/.commands</code>  文件中， 一行一条。  <strong>也可以在命令前添加一些注释来辅助检索(但不会被当作命令的一部分)</strong><br>例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">email: nextzhou@gmail.com</span><br><span class="line">local ip: ifconfig | rg &#39;\binet\b&#39; | rg -v &#39;127.0.0.1&#39; | awk &#39;&#123;print $2&#125;&#39;</span><br><span class="line">public ip: curl ip.sb</span><br></pre></td></tr></table></figure>
+
+<p>打开 <code>Alfred</code>，通过关键词<code>c</code>触发插件，输入关键词就可以渐进地模糊匹配 <code>~/.commands</code> 中所记录的命令了。直接<code>⏎</code>是将命令复制到剪切板。</p>
+<p><img src="/uploads/c_workflow_copy.gif" alt=""></p>
+<p>如果同时按下 <code>⌘⏎</code> 键，那么将会直接执行所选中的命令，并通过系统通知展示执行输出结果。</p>
+<p><img src="/uploads/c_workflow_exec.gif" alt=""></p>
+<p>如果同时按下<code>⌘⇧⏎</code>键，那么将会执行所选中的命令，并将命令输出结果复制<br>到系统剪切板并通过系统通知展示。</p>
+<p><img src="/uploads/c_workflow_exec_copy.gif" alt=""></p>
+<h2 id="Q-amp-A"><a href="#Q-amp-A" class="headerlink" title="Q&amp;A"></a>Q&amp;A</h2><p>Q: 我不是 MacOS 可以使用吗？</p>
+<p>A: <code>Alfred</code> 只支持 MacOS 平台，不过你可以试试这个<a href="https://gist.github.com/nextzhou/e7dbfa7bf51e24a51573461142ad8a22" target="_blank" rel="noopener">命令行版本</a></p>
+<p>Q: 我不想用关键词 <code>c</code> 触发，能不能修改？</p>
+<p>A: 可导入 workflow 后自行修改 <code>Script Filter</code> 中的触发关键词，甚至可以更换成快捷键触发。</p>
+<p>Q: 选择命令并按<code>⌘⏎</code>执行，结果弹出的系统通知里是空的？</p>
+<p>A: 这可能是执行命令出错了，此 workflow 只捕获了<code>stdout</code>的内容，可以尝试将 <code>stderr</code> 重定向到 <code>stdout</code>(在命令最后添加 <code>2&gt;&amp;1</code>)试试看。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://blog.nextzhou.site/2020/01/01/%E4%BD%8E%E7%B2%BE%E5%BA%A6%E6%B5%AE%E7%82%B9%E6%95%B0%E4%B8%8E%E7%9B%91%E6%8E%A7%E6%95%B0%E6%8D%AE%E6%94%B6%E9%9B%86/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -196,7 +304,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-01-02 22:41:03" itemprop="dateModified" datetime="2020-01-02T22:41:03+08:00">2020-01-02</time>
+                <time title="修改时间：2020-05-31 21:45:55" itemprop="dateModified" datetime="2020-05-31T21:45:55+08:00">2020-05-31</time>
               </span>
 
           
@@ -398,14 +506,14 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">1</span>
+          <span class="site-state-item-count">2</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-count">2</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -441,7 +549,7 @@
   </span>
   <span class="author" itemprop="copyrightHolder">nextzhou</span>
 </div>
-  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.2.0
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.2.1
   </div>
   <span class="post-meta-divider">|</span>
   <div class="theme-info">主题 – <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.7.0
